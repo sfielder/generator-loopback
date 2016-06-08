@@ -12,7 +12,7 @@ var SANDBOX =  path.resolve(__dirname, 'sandbox');
 var expect = require('chai').expect;
 var common = require('./common');
 
-describe('loopback:property generator', function() {
+describe.only('loopback:property generator', function() {
   beforeEach(common.resetWorkspace);
   beforeEach(function createSandbox(done) {
     helpers.testDirectory(SANDBOX, done);
@@ -53,6 +53,121 @@ describe('loopback:property generator', function() {
         type: 'boolean',
         required: true,
         default: true
+      });
+      done();
+    });
+  });
+
+  it('should create model containing number type', function(done) {
+    var propertyGenerator = givenPropertyGenerator();
+    helpers.mockPrompt(propertyGenerator, {
+      model: 'Car',
+      name: 'age',
+      type: 'number',
+      required: 'true',
+      defaultValue: '555555555555555555555.5'
+    });
+
+    propertyGenerator.run(function() {
+      var definition = common.readJsonSync('common/models/car.json');
+      var props = definition.properties || {};
+      expect(props).to.have.property('age');
+      expect(props.age).to.eql({
+        type: 'number',
+        required: true,
+        default: 555555555555555555555.5
+      });
+      done();
+    });
+  });
+
+  it('should create model containing array type', function(done) {
+    var propertyGenerator = givenPropertyGenerator();
+    helpers.mockPrompt(propertyGenerator, {
+      model: 'Car',
+      name: 'options',
+      type: 'array',
+      required: 'true',
+      defaultValue: 'AWD,3.2L, navigation'
+    });
+
+    propertyGenerator.run(function() {
+      var definition = common.readJsonSync('common/models/car.json');
+      var props = definition.properties || {};
+      expect(props).to.have.property('options');
+      expect(props.options).to.eql({
+        type: 'array',
+        required: true,
+        default: ['AWD','3.2L','navigation']
+      });
+      done();
+    });
+  });
+
+  it('should create model containing date type', function(done) {
+    var propertyGenerator = givenPropertyGenerator();
+    helpers.mockPrompt(propertyGenerator, {
+      model: 'Car',
+      name: 'year',
+      type: 'date',
+      required: 'true',
+      defaultValue: '2015-11'
+    });
+
+    propertyGenerator.run(function() {
+      var definition = common.readJsonSync('common/models/car.json');
+      var props = definition.properties || {};
+      expect(props).to.have.property('year');
+      expect(props.year).to.eql({
+        type: 'date',
+        required: true,
+        default: '2015-11'
+      });
+      done();
+    });
+  });
+
+  it('should create model containing geopoint type', function(done) {
+    var propertyGenerator = givenPropertyGenerator();
+    helpers.mockPrompt(propertyGenerator, {
+      model: 'Car',
+      name: 'location',
+      type: 'geopoint',
+      required: 'true',
+      defaultValue: '{"lat": 55.5, "lng":44.4}'
+    });
+
+    propertyGenerator.run(function() {
+      var definition = common.readJsonSync('common/models/car.json');
+      var props = definition.properties || {};
+      expect(props).to.have.property('location');
+      expect(props.location).to.eql({
+        type: 'geopoint',
+        required: true,
+        default: {'lat': 55.5, 'lng':44.4}
+      });
+      done();
+    });
+  });
+
+  it('should create model containing geopoint type', function(done) {
+    var propertyGenerator = givenPropertyGenerator();
+    helpers.mockPrompt(propertyGenerator, {
+      model: 'Car',
+      name: 'location',
+      type: 'geopoint',
+      required: 'true',
+      defaultValue: '55.5, 44.4'
+    });
+
+    propertyGenerator.run(function() {
+      var definition = common.readJsonSync('common/models/car.json');
+      var props = definition.properties || {};
+      expect(props).to.have.property('location');
+      expect(props.location).to.eql({
+        type: 'geopoint',
+        required: true,
+        default: {'lat': 55.5, 'lng':44.4}
       });
       done();
     });

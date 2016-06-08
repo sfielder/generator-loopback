@@ -12,6 +12,7 @@ var helpers = require('../lib/helpers');
 var validateRequiredName = helpers.validateRequiredName;
 var checkPropertyName = helpers.checkPropertyName;
 var typeChoices = helpers.getTypeChoices();
+var debug = require('debug')('generator:property');
 
 module.exports = yeoman.Base.extend({
   // NOTE(bajtos)
@@ -137,22 +138,16 @@ module.exports = yeoman.Base.extend({
     if (this.required) {
       def.required = true;
     }
+
     if (this.defaultValue) {
-      if (this.type === 'boolean'){
-        if (['true', '1', 't'].indexOf(this.defaultValue) !== -1 ){
-          def.default = true;
-        } else {
-          def.default = false;
-        }
-      } else if (this.defaultValue === 'uuid' || this.defaultValue === 'guid'){
-         def.defaultFn = this.defaultValue;
-      } else if ((this.type === 'date' || this.type === 'datetime') &&
-                  this.defaultValue.toLowerCase() === 'now'){
-         def.defaultFn = 'now';
-      } else {
-         def.default = this.defaultValue;
+      try {
+        def = coerceDefault(def, this.defaultValue);
+      } catch(err) {
+        throw Error('Failed converting "' + this.defaultValue +
+          '" - ' +  err);
       }
     }
+    debug(this.modelName+ ' property: %j', def);
 
     this.modelDefinition.properties.create(def, function(err) {
       helpers.reportValidationError(err, this.log);
@@ -162,3 +157,62 @@ module.exports = yeoman.Base.extend({
 
   saveProject: actions.saveProject
 });
+
+function coerceDefault(def, value) {
+  var isSupported = typeChoices.indexOf(def.type) !== -1;
+  debug('property type "%s" >> supported: %s', def.type, isSupported);
+
+  if (isSupported) {
+    switch ((def.type || '').toLowerCase()) {
+      case 'string':
+        def.default = value;
+        break;
+      case 'number':
+        def.default = Number(value);
+        break;
+      case 'boolean':
+        if (['true', '1', 't'].indexOf(value) !== -1 ){
+          def.default = true;
+        } else {
+          def.default = false;
+        }
+        break;
+      case 'object':
+        def.default = JSON.parse(value);
+        break;
+      case 'array':
+        def.default = value.replace(/[\s,]+/g, ',').split(',');
+        break;
+      case 'date', 'datetime':
+        if (value.toLowerCase() === 'now'){
+          def.defaultFn = 'now';
+        } else {
+          def.default = new Date(value);
+        }
+        break;
+      case 'geopoint':
+        if (value.indexOf('lat') !== -1 && value.indexOf('lng') !== -1) {
+          def.default = JSON.parse(value);
+        } else {
+          var geo = value.replace(/[\s,]+/g, ',').split(',');
+          def.default = {};
+          def.default.lat = Number(geo[0]);
+          def.default.lng = Number(geo[1]);
+        }
+        break;
+      case 'buffer':
+        break;
+      case 'any':
+        break;
+      default:
+        if (value === 'uuid' || value === 'guid'){
+          def.defaultFn = value;
+        } else {
+          def.default = value;
+        }
+    }
+    return def;
+  } else {
+    throw Error('Unsupported model property type ' + def.type);
+  }
+}
