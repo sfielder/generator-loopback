@@ -55,7 +55,7 @@ module.exports = yeoman.Base.extend({
 
     if (!this.modelDefinition) {
       var msg = 'Model not found: ' + this.modelName;
-      console.warn(chalk.red(msg));
+      this.log(chalk.red(msg));
       this.async()(new Error(msg));
     }
   },
@@ -68,6 +68,7 @@ module.exports = yeoman.Base.extend({
         name: 'name',
         message: 'Enter the property name:',
         validate: checkPropertyName,
+        default: this.propDefinition && this.propDefinition.name,
         when: function() {
           return !this.name && this.name !== 0;
         }.bind(this)
@@ -76,6 +77,7 @@ module.exports = yeoman.Base.extend({
         name: 'type',
         message: 'Property type:',
         type: 'list',
+        default: this.propDefinition && this.propDefinition.type,
         choices: typeChoices
       },
       {
@@ -115,8 +117,8 @@ module.exports = yeoman.Base.extend({
          message: 'Default value[leave blank for none]:',
          default: null,
          when: function(answers) {
-          return answers.required &&
-            answers.type !== null && 
+          return answers.type !== null && 
+            answers.type !== 'buffer'&&
             answers.type !== 'any'&&
             typeChoices.indexOf(answers.type) !== -1;
         }
@@ -153,7 +155,7 @@ module.exports = yeoman.Base.extend({
             ' property again. The default value provided "' +
             answers.defaultValue + 
             '" is not valid for the selected type: ' + this.type);
-          this.askForParameters();
+          return this.askForParameters();
         }
       }
       done();
@@ -163,7 +165,7 @@ module.exports = yeoman.Base.extend({
   property: function() {
     var done = this.async();
     this.modelDefinition.properties.create(this.propDefinition, function(err) {
-      helpers.reportValidationError(err, console.warn);
+      helpers.reportValidationError(err, this.log);
       return done(err);
     }.bind(this));
   },
@@ -180,10 +182,7 @@ function coerceDefaultValue(propDef, value) {
       }
       break;
     case 'number':
-      propDef.default = Number(value);
-      if(isNaN(propDef.default)) {
-        throw Error('Invalid default number value: '+ value);
-      }
+      propDef.default = castToNumber(value);
       break;
     case 'boolean':
       if (['true', '1', 't'].indexOf(value) !== -1 ){
@@ -198,7 +197,7 @@ function coerceDefaultValue(propDef, value) {
       } else {
         var isNumber = /^[0-9]+$/.test(value);
         if (isNumber) {
-          propDef.default = new Date(Number(value));
+          propDef.default = new Date(castToNumber(value));
         } else {
           propDef.default = new Date(value);
         }
@@ -210,7 +209,7 @@ function coerceDefaultValue(propDef, value) {
       } else if (propDef.itemType === 'number') {
         propDef.default = value.replace(/[\s,]+/g, ',').split(',')
           .map(function(item) {
-            return Number(item);
+            return Number(castToNumber(item));
           });
       } else {
         propDef.default = value;
@@ -222,14 +221,9 @@ function coerceDefaultValue(propDef, value) {
       } else {
         var geo = value.replace(/[\s,]+/g, ',').split(',');
         propDef.default = {};
-        propDef.default.lat = Number(geo[0]);
-        propDef.default.lng = Number(geo[1]);
+        propDef.default.lat = Number(castToNumber(geo[0]));
+        propDef.default.lng = Number(castToNumber(geo[1]));
       }
-      break;
-    case 'buffer':
-      console.warn('Warning: property default value was converted' + 
-        'from string using default node.js UTF8 encoding');
-      propDef.default = new Buffer(value);
       break;
     case 'object':
       propDef.default = JSON.parse(value);
@@ -237,4 +231,12 @@ function coerceDefaultValue(propDef, value) {
     default:
       propDef.default = value;
   }
+}
+
+function castToNumber(value) {
+  var numberValue = Number(value);
+  if (isNaN(numberValue)) {
+    throw Error('Invalid default number value: '+ value);
+  }
+  return numberValue;
 }
