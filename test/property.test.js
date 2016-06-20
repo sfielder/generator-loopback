@@ -63,6 +63,10 @@ describe('loopback:property generator', function() {
     helpers.mockPrompt(propertyGenerator, {
       model: 'Car',
       name: 'isPreferred',
+      customType: '', // temporary workaround for
+                      // https://github.com/yeoman/generator/issues/600
+      customItemType: '', // temporary workaround for
+                          // https://github.com/yeoman/generator/issues/600
       type: 'boolean',
       required: 'true',
       defaultValue: 'true'
@@ -133,6 +137,10 @@ describe('loopback:property generator', function() {
       model: 'Car',
       name: 'list',
       type: 'array',
+      customType: '', // temporary workaround for
+                      // https://github.com/yeoman/generator/issues/600
+      customItemType: '', // temporary workaround for
+                          // https://github.com/yeoman/generator/issues/600
       itemType: 'string'
     });
 
@@ -263,6 +271,10 @@ describe('loopback:property generator', function() {
       model: 'Car',
       name: 'created',
       type: 'date',
+      customType: '', // temporary workaround for
+                      // https://github.com/yeoman/generator/issues/600
+      customItemType: '', // temporary workaround for
+                          // https://github.com/yeoman/generator/issues/600
       required: true,
       defaultValue: 'Now'
     });
@@ -281,6 +293,10 @@ describe('loopback:property generator', function() {
       model: 'Car',
       name: 'uniqueId',
       type: 'string',
+      customType: '', // temporary workaround for
+                      // https://github.com/yeoman/generator/issues/600
+      customItemType: '', // temporary workaround for
+                          // https://github.com/yeoman/generator/issues/600
       required: true,
       defaultValue: 'uuid'
     });
