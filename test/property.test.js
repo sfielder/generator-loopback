@@ -168,8 +168,7 @@ describe('loopback:property generator', function() {
       var props = definition.properties || {};
       expect(props).to.have.property('options');
       expect(props.options).to.eql({
-        type: 'array',
-        itemType: 'string',
+        type: ['string'],
         required: true,
         default: ['AWD','3.2L','navigation']
       });
@@ -193,8 +192,7 @@ describe('loopback:property generator', function() {
       var props = definition.properties || {};
       expect(props).to.have.property('parts');
       expect(props.parts).to.eql({
-        type: 'array',
-        itemType: 'number',
+        type: ['number'],
         required: true,
         default: [123456, 98765]
       });
@@ -275,7 +273,6 @@ describe('loopback:property generator', function() {
                       // https://github.com/yeoman/generator/issues/600
       customItemType: '', // temporary workaround for
                           // https://github.com/yeoman/generator/issues/600
-      required: true,
       defaultValue: 'Now'
     });
 
@@ -287,7 +284,7 @@ describe('loopback:property generator', function() {
     });
   });
 
-  it('creates defaultFn: "guid" on date fields', function(done) {
+  it('creates a defaultFn: "guid" on date fields if specified', function(done) {
     var propertyGenerator = givenPropertyGenerator();
     helpers.mockPrompt(propertyGenerator, {
       model: 'Car',
@@ -307,20 +304,6 @@ describe('loopback:property generator', function() {
       expect(prop.defaultFn).to.eql('uuid');
       done();
     });
-  });
-
-  it('fails to create with unsupported type', function (done) {
-    var propertyGenerator = givenPropertyGenerator();
-    helpers.mockPrompt(propertyGenerator, {
-      model: 'Car',
-      name: 'something',
-      type: 'unknown',
-      required: 'true',
-      defaultValue: 'X'
-    });
-
-    expect(propertyGenerator.run).to.throw(Error);
-    done();
   });
 
   function givenPropertyGenerator() {

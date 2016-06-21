@@ -93,6 +93,7 @@ module.exports = yeoman.Base.extend({
         name: 'itemType',
         message: 'The type of array items:',
         type: 'list',
+        default: this.propDefinition && this.propDefinition.itemType,
         choices: typeChoices.filter(function(t) { return t !== 'array'; }),
         when: function(answers) {
           return answers.type === 'array';
@@ -118,8 +119,8 @@ module.exports = yeoman.Base.extend({
          default: null,
          when: function(answers) {
           return answers.type !== null && 
-            answers.type !== 'buffer'&&
-            answers.type !== 'any'&&
+            answers.type !== 'buffer' &&
+            answers.type !== 'any' &&
             typeChoices.indexOf(answers.type) !== -1;
         }
       }
@@ -137,15 +138,11 @@ module.exports = yeoman.Base.extend({
 
       this.propDefinition = {
         name: this.name,
-        type: this.type
+        type: this.type,
+        required: Boolean(answers.required),
       };
-      if (answers.required) {
-        this.propDefinition.required = true;
-      }
 
       if (answers.defaultValue) {
-        this.propDefinition.type = answers.type;
-        this.propDefinition.itemType = answers.itemType;
         try {
           coerceDefaultValue(this.propDefinition, answers.defaultValue);
           debug('property definition: %j', this.propDefinition);
@@ -173,6 +170,12 @@ module.exports = yeoman.Base.extend({
 });
 
 function coerceDefaultValue(propDef, value) {
+  var itemType;
+  if (Array.isArray(propDef.type)) {
+    itemType = propDef.type[0];
+    propDef.type = 'array';
+  }
+
   switch (propDef.type) {
     case 'string':
       if (value === 'uuid' || value === 'guid'){
@@ -204,9 +207,10 @@ function coerceDefaultValue(propDef, value) {
       }
       break;
     case 'array':
-      if (propDef.itemType === 'string') {
+      propDef.type = [itemType];
+      if (itemType === 'string') {
         propDef.default = value.replace(/[\s,]+/g, ',').split(',');
-      } else if (propDef.itemType === 'number') {
+      } else if (itemType === 'number') {
         propDef.default = value.replace(/[\s,]+/g, ',').split(',')
           .map(function(item) {
             return Number(castToNumber(item));
