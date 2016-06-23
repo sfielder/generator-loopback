@@ -93,7 +93,10 @@ module.exports = yeoman.Base.extend({
         name: 'itemType',
         message: 'The type of array items:',
         type: 'list',
-        default: this.propDefinition && this.propDefinition.itemType,
+        default: this.propDefinition && 
+          this.propDefinition.type &&
+          Array.isArray(this.propDefinition.type) &&
+          this.propDefinition.type[0],
         choices: typeChoices.filter(function(t) { return t !== 'array'; }),
         when: function(answers) {
           return answers.type === 'array';
@@ -141,7 +144,7 @@ module.exports = yeoman.Base.extend({
         type: this.type,
       };
       if (answers.required) {
-        this.propDefinition = Boolean(answers.required);
+        this.propDefinition.required = Boolean(answers.required);
       }
 
       if (answers.defaultValue) {
@@ -215,7 +218,7 @@ function coerceDefaultValue(propDef, value) {
       } else if (itemType === 'number') {
         propDef.default = value.replace(/[\s,]+/g, ',').split(',')
           .map(function(item) {
-            return Number(castToNumber(item));
+            return castToNumber(item);
           });
       } else {
         propDef.default = value;
@@ -227,8 +230,8 @@ function coerceDefaultValue(propDef, value) {
       } else {
         var geo = value.replace(/[\s,]+/g, ',').split(',');
         propDef.default = {};
-        propDef.default.lat = Number(castToNumber(geo[0]));
-        propDef.default.lng = Number(castToNumber(geo[1]));
+        propDef.default.lat = castToNumber(geo[0]);
+        propDef.default.lng = castToNumber(geo[1]);
       }
       break;
     case 'object':
