@@ -5,7 +5,6 @@
 
 'use strict';
 
-var path = require('path');
 var SG = require('strong-globalize');
 var g = SG();
 
@@ -19,6 +18,7 @@ var actions = require('../lib/actions');
 var helpers = require('../lib/helpers');
 var validateRequiredName = helpers.validateRequiredName;
 var objectValidator = helpers.objectValidator;
+var path = require('path');
 var fs = require('fs');
 
 module.exports = yeoman.Base.extend({
@@ -33,7 +33,7 @@ module.exports = yeoman.Base.extend({
     yeoman.Base.apply(this, arguments);
 
     this.argument('name', {
-      desc: g.f('Name of the data-source to create.'),
+      desc: g.t('Name of the data-source to create.'),
       required: false,
       type: String,
     });
@@ -52,8 +52,8 @@ module.exports = yeoman.Base.extend({
 
       this.listOfAvailableConnectors = list.map(function(c) {
         var support = c.supportedByStrongLoop ?
-          g.f(' (supported by StrongLoop)') :
-          g.f(' (provided by community)');
+          g.t(' (supported by StrongLoop)') :
+          g.t(' (provided by community)');
         return {
           name: c.description + support,
           value: c.name,
@@ -78,7 +78,7 @@ module.exports = yeoman.Base.extend({
     var prompts = [
       {
         name: 'name',
-        message: g.f('Enter the data-source name:'),
+        message: g.t('Enter the data-source name:'),
         default: this.name,
         validate: validateRequiredName,
       },
@@ -105,7 +105,7 @@ module.exports = yeoman.Base.extend({
       {
         name: 'customConnector',
         message:
-          g.f('Enter the connector name without the ' +
+          g.t('Enter the connector name without the ' +
             'loopback-connector- prefix:'),
         validate: validateRequiredName,
         when: function(answers) {
@@ -171,7 +171,7 @@ module.exports = yeoman.Base.extend({
     if (!prompts.length && !warnings.length)
       return;
 
-    g.log('Connector-specific configuration:');
+    this.log(g.t('Connector-specific configuration:'));
     if (!prompts.length) return reportWarnings();
 
     return this.prompt(prompts).then(function(props) {

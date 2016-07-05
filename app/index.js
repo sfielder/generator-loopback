@@ -28,34 +28,34 @@ module.exports = yeoman.Base.extend({
     yeoman.Base.apply(this, arguments);
 
     this.argument('name', {
-      desc: g.f('Name of the application to scaffold.'),
+      desc: g.t('Name of the application to scaffold.'),
       required: false,
       type: String,
     });
 
     this.option('skip-install', {
-      desc: g.f('Do not install npm dependencies.'),
-      type: Boolean
+      desc: g.t('Do not install npm dependencies.'),
+      type: Boolean,
     });
 
     this.option('skip-next-steps', {
-      desc: g.f('Do not print "next steps" info'),
-      type: Boolean
+      desc: g.t('Do not print "next steps" info'),
+      type: Boolean,
     });
 
     this.option('explorer', {
-      desc: g.f('Add Loopback Explorer to the project (true by default)'),
-      type: Boolean
+      desc: g.t('Add Loopback Explorer to the project (true by default)'),
+      type: Boolean,
     });
   },
 
   greet: function() {
-    g.log(yosay(g.f('Let\'s create a LoopBack application!')));
+    this.log(yosay(g.f('Let\'s create a LoopBack application!')));
   },
 
   help: function() {
     var msgs = [helpers.customHelp(this)];
-    msgs.push(g.f('Available generators: \n\n  '));
+    msgs.push(g.t('Available generators: \n\n  '));
     msgs.push(Object.keys(this.options.env.getGeneratorsMeta())
       .filter(function(name) {
         return name.indexOf('loopback:') !== -1;
@@ -89,7 +89,7 @@ module.exports = yeoman.Base.extend({
       this.templates = list.map(function(t) {
         return {
           name: g.f('%s (%s)', t.name, t.description),
-          value: t.name
+          value: t.name,
         };
       });
 
@@ -123,7 +123,7 @@ module.exports = yeoman.Base.extend({
     var prompts = [
       {
         name: 'appname',
-        message: g.f('What\'s the name of your application?'),
+        message: g.t('What\'s the name of your application?'),
         default: name,
         validate: validateAppName,
       },
@@ -139,7 +139,7 @@ module.exports = yeoman.Base.extend({
   askForTemplate: function() {
     var prompts = [{
       name: 'wsTemplate',
-      message: g.f('What kind of application do you have in mind?'),
+      message: g.t('What kind of application do you have in mind?'),
       type: 'list',
       default: this.defaultTemplate,
       choices: this.templates,
@@ -175,7 +175,7 @@ module.exports = yeoman.Base.extend({
       if (err) {
         cb();
       } else {
-        cb(new Error(g.f('The generator must be run in an empty directory.')));
+        cb(new Error(g.t('The generator must be run in an empty directory.')));
       }
     });
   },
@@ -199,7 +199,7 @@ module.exports = yeoman.Base.extend({
   },
 
   generateYoRc: function() {
-    g.log('Generating .yo-rc.json');
+    this.log(g.f('Generating {{.yo-rc.json}}'));
     this.config.save();
   },
 
@@ -214,27 +214,27 @@ module.exports = yeoman.Base.extend({
       this.log();
     }
 
-    g.log('Next steps:');
+    this.log(g.t('Next steps:'));
     this.log();
     if (this.dir && this.dir !== '.') {
-      g.log('  Change directory to your app');
+      this.log(g.t('  Change directory to your app'));
       this.log(chalk.green('    $ cd ' + this.dir));
       this.log();
     }
     if (cmd === 'apic') {
-      g.log('  Run API Designer to create, test, and publish your' +
-        ' application');
+      this.log(g.t('  Run API Designer to create, test, and publish your' +
+        ' application'));
       this.log(chalk.green('    $ apic edit'));
       this.log();
     } else {
-      g.log('  Create a model in your app');
+      this.log(g.t('  Create a model in your app'));
       this.log(chalk.green('    $ ' + cmd + ' loopback:model'));
       this.log();
-      g.log(
-        '  Compose your API, run, deploy, profile, and monitor it with Arc');
+      this.log(g.f(
+        '  Compose your API, run, deploy, profile, and monitor it with Arc'));
       this.log(chalk.green('    $ slc arc'));
       this.log();
-      g.log('  Run the app');
+      this.log(g.t('  Run the app'));
       this.log(chalk.green('    $ node .'));
       this.log();
     }

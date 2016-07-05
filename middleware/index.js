@@ -46,7 +46,7 @@ module.exports = yeoman.Base.extend({
     yeoman.Base.apply(this, arguments);
 
     this.argument('name', {
-      desc: g.f('Name of the middleware to create.'),
+      desc: g.t('Name of the middleware to create.'),
       required: false,
       type: String,
     });
@@ -75,7 +75,7 @@ module.exports = yeoman.Base.extend({
     var prompts = [
       {
         name: 'name',
-        message: g.f('Enter the middleware name:'),
+        message: g.t('Enter the middleware name:'),
         default: this.name,
         validate: validateRequiredName,
       },
@@ -99,7 +99,7 @@ module.exports = yeoman.Base.extend({
       },
       {
         name: 'customPhase',
-        message: g.f('Enter the phase name:'),
+        message: g.t('Enter the phase name:'),
         validate: validateRequiredName,
         when: function(answers) {
           return answers.phase === OTHER_PHASE;
@@ -107,7 +107,7 @@ module.exports = yeoman.Base.extend({
       },
       {
         name: 'nextPhase',
-        message: g.f('Select the phase before which the new one will ' +
+        message: g.t('Select the phase before which the new one will ' +
           'be inserted:'),
         type: 'list',
         default: 'routes',
@@ -119,13 +119,13 @@ module.exports = yeoman.Base.extend({
       {
         name: 'subPhase',
         message: g.f('Select the sub phase for %s:', displayName),
-         type: 'list',
+        type: 'list',
         default: '',
         choices: [
-          {name: g.f('1. before'), value: 'before'},
-          {name: g.f('2. regular'), value: ''},
-          {name: g.f('3. after'), value: 'after'}
-        ]
+          {name: g.t('1. before'), value: 'before'},
+          {name: g.t('2. regular'), value: ''},
+          {name: g.t('3. after'), value: 'after'},
+        ],
       },
     ];
 
@@ -139,20 +139,20 @@ module.exports = yeoman.Base.extend({
 
   promptForPaths: function() {
     var displayName = chalk.yellow(this.name);
-    g.log('Specify paths for %s:', displayName);
+    this.log(g.f('Specify paths for %s:', displayName));
   },
 
   askForPaths: function() {
     var done = this.async();
-    g.log('Enter an empty path name when done.');
+    this.log(g.t('Enter an empty path name when done.'));
     var prompts = [
       {
         name: 'path',
-        message: g.f('Path uri:'),
+        message: g.t('Path uri:'),
         validate: function(input) {
           if (input) {
             if (input.indexOf('/') !== 0) {
-              return g.f('Path must start with /');
+              return g.t('Path must start with /');
             } else {
               return true;
             }
@@ -169,7 +169,7 @@ module.exports = yeoman.Base.extend({
 
       this.paths = this.paths || [];
       this.paths.push(answers.path);
-      g.log(g.f('Let\'s add another path.'));
+      this.log(g.t('Let\'s add another path.'));
       this.askForPaths();
     }.bind(this));
   },
@@ -178,7 +178,7 @@ module.exports = yeoman.Base.extend({
     var prompts = [
       {
         name: 'params',
-        message: g.f('Configuration parameters in JSON format:'),
+        message: g.t('Configuration parameters in JSON format:'),
         default: '{}',
         validate: function(input) {
           if (input) {
@@ -224,8 +224,8 @@ module.exports = yeoman.Base.extend({
     wsModels.Middleware.addMiddleware(config, function(err, inst) {
       helpers.reportValidationError(err, self.log);
       if (!err && inst) {
-        g.log(
-          'Middleware %s is added to phase %s.', inst.name, inst.phase);
+        self.log(g.f(
+          'Middleware %s is added to phase %s.', inst.name, inst.phase));
       }
       return done(err);
     });

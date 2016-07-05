@@ -38,7 +38,7 @@ module.exports = yeoman.Base.extend({
     yeoman.Base.apply(this, arguments);
 
     this.argument('url', {
-      desc: g.f('URL of the swagger spec.'),
+      desc: g.t('URL of the swagger spec.'),
       required: false,
       type: String,
     });
@@ -57,7 +57,7 @@ module.exports = yeoman.Base.extend({
     var prompts = [
       {
         name: 'url',
-        message: g.f('Enter the swagger spec url or file path:'),
+        message: g.t('Enter the swagger spec url or file path:'),
         default: this.url,
         validate: validateUrlOrFile,
       },
@@ -185,13 +185,13 @@ module.exports = yeoman.Base.extend({
         var prompts = [
           {
             name: 'modelSelections',
-            message: g.f('Select models to be generated:'),
+            message: g.t('Select models to be generated:'),
             type: 'checkbox',
             choices: choices,
           },
           {
             name: 'dataSource',
-            message: g.f('Select the data-source to attach models to:'),
+            message: g.t('Select the data-source to attach models to:'),
             type: 'list',
             default: self.defaultDataSource,
             choices: self.dataSources,
@@ -256,27 +256,27 @@ module.exports = yeoman.Base.extend({
                   });
               }, function(err) {
                 if (!err) {
-                  g.log(chalk.green(g.f('Model definition created/updated for' +
-                  ' %s.', modelDef.name)));
+                  self.log(chalk.green(g.f('Model definition created/updated ' +
+                  'for %s.', modelDef.name)));
                 }
                 cb(err);
               });
           });
         } else {
-          g.log(chalk.green(g.f('Model definition created/updated for %s.',
+          self.log(chalk.green(g.f('Model definition created/updated for %s.',
             modelDef.name)));
           cb();
         }
       }
 
       if (self.selectedModels[modelDef.name] === SELECTED_FOR_UPDATE) {
-        g.log(chalk.green(g.f('Updating model definition for %s...',
+        self.log(chalk.green(g.f('Updating model definition for %s...',
           modelDef.name)));
         modelDef.id = wsModels.ModelDefinition.getUniqueId(modelDef);
         // update the model definition
         wsModels.ModelDefinition.upsert(modelDef, processResult);
       } else if (self.selectedModels[modelDef.name] === SELECTED_FOR_CREATE) {
-        g.log(chalk.green(g.f('Creating model definition for %s...',
+        self.log(chalk.green(g.f('Creating model definition for %s...',
           modelDef.name)));
         wsModels.ModelDefinition.create(modelDef, processResult);
       } else {
@@ -290,22 +290,22 @@ module.exports = yeoman.Base.extend({
         config.dataSource = self.dataSource;
       }
       if (self.selectedModels[config.name] === SELECTED_FOR_UPDATE) {
-        g.log(chalk.green(g.f('Updating model config for %s...',
+        self.log(chalk.green(g.f('Updating model config for %s...',
           config.name)));
         config.id = wsModels.ModelDefinition.getUniqueId(config);
         wsModels.ModelConfig.upsert(config, function(err) {
           if (!err) {
-            g.log(chalk.green(g.f('Model config updated for %s.',
+            self.log(chalk.green(g.f('Model config updated for %s.',
               config.name)));
           }
           return cb(err);
         });
       } else if (self.selectedModels[config.name] === SELECTED_FOR_CREATE) {
-        g.log(chalk.green(g.f('Creating model config for %s...',
+        self.log(chalk.green(g.f('Creating model config for %s...',
           config.name)));
-        wsModels.ModelConfig.create(config, function (err) {
+        wsModels.ModelConfig.create(config, function(err) {
           if (!err) {
-            g.log(chalk.green(g.f('Model config created for %s.',
+            self.log(chalk.green(g.f('Model config created for %s.',
               config.name)));
           }
           return cb(err);
@@ -323,7 +323,7 @@ module.exports = yeoman.Base.extend({
         if (!modelDef) {
           return done();
         }
-        g.log(chalk.green(g.f('Generating %s', modelDef.scriptPath)));
+        self.log(chalk.green(g.f('Generating %s', modelDef.scriptPath)));
         fs.writeFile(modelDef.scriptPath, api.code, done);
       }, cb);
     }
@@ -350,8 +350,8 @@ module.exports = yeoman.Base.extend({
 
     generateApis(self, function(err) {
       if (!err) {
-        g.log(
-          chalk.green(g.f('Models are successfully generated from ' +
+        self.log(
+          chalk.green(g.t('Models are successfully generated from ' +
             'swagger spec.')));
       }
       helpers.reportValidationError(err, self.log);
@@ -364,7 +364,7 @@ module.exports = yeoman.Base.extend({
 
 function validateUrlOrFile(specUrlStr) {
   if (!specUrlStr) {
-    return g.f('spec url or file path is required');
+    return g.t('spec url or file path is required');
   }
   var specUrl = url.parse(specUrlStr);
   if (specUrl.protocol === 'http:' || specUrl.protocol === 'https:') {

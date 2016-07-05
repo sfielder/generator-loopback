@@ -41,7 +41,7 @@ module.exports = yeoman.Base.extend({
     var prompts = [
       {
         name: 'model',
-        message: g.f('Select the model to create the relationship from:'),
+        message: g.t('Select the model to create the relationship from:'),
         type: 'list',
         choices: this.editableModelNames,
       },
@@ -59,7 +59,7 @@ module.exports = yeoman.Base.extend({
 
     if (!this.modelDefinition) {
       var msg = g.f('Model not found: %s', this.modelName);
-      g.log(chalk.red(msg));
+      this.log(chalk.red(msg));
       this.async()(new Error(msg));
     }
   },
@@ -78,26 +78,26 @@ module.exports = yeoman.Base.extend({
     var modelDef = this.modelDefinition;
 
     var modelChoices = this.editableModelNames.concat({
-      name: g.f('(other)'),
-      value: null
+      name: g.t('(other)'),
+      value: null,
     });
 
     var prompts = [
       {
         name: 'type',
-        message: g.f('Relation type:'),
+        message: g.t('Relation type:'),
         type: 'list',
         choices: this.availableTypes,
       },
       {
         name: 'toModel',
-        message: g.f('Choose a model to create a relationship with:'),
+        message: g.t('Choose a model to create a relationship with:'),
         type: 'list',
         choices: modelChoices,
       },
       {
         name: 'customToModel',
-        message: g.f('Enter the model name:'),
+        message: g.t('Enter the model name:'),
         required: true,
         validate: validateRequiredName,
         when: function(answers) {
@@ -106,7 +106,7 @@ module.exports = yeoman.Base.extend({
       },
       {
         name: 'asPropertyName',
-        message: g.f('Enter the property name for the relation:'),
+        message: g.t('Enter the property name for the relation:'),
         required: true,
         default: function(answers) {
           var m = answers.customToModel || answers.toModel;
@@ -126,12 +126,12 @@ module.exports = yeoman.Base.extend({
       },
       {
         name: 'foreignKey',
-        message: g.f('Optionally enter a custom foreign key:'),
-        validate: validateOptionalName
+        message: g.t('Optionally enter a custom foreign key:'),
+        validate: validateOptionalName,
       },
       {
         name: 'through',
-        message: g.f('Require a through model?'),
+        message: g.t('Require a through model?'),
         type: 'confirm',
         default: false,
         when: function(answers) {
@@ -140,7 +140,7 @@ module.exports = yeoman.Base.extend({
       },
       {
         name: 'throughModel',
-        message: g.f('Choose a through model:'),
+        message: g.t('Choose a through model:'),
         type: 'list',
         choices: modelChoices,
         when: function(answers) {
@@ -149,7 +149,7 @@ module.exports = yeoman.Base.extend({
       },
       {
         name: 'customThroughModel',
-        message: g.f('Enter the model name:'),
+        message: g.t('Enter the model name:'),
         required: true,
         validate: validateRequiredName,
         when: function(answers) {

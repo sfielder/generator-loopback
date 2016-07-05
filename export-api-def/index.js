@@ -24,8 +24,8 @@ module.exports = yeoman.Base.extend({
     this.option('output', {
       type: String,
       alias: 'o',
-      desc: g.f('Name/Full path to the output file.'),
-      defaults: ''
+      desc: g.t('Name/Full path to the output file.'),
+      defaults: '',
     });
   },
 

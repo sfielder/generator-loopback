@@ -27,7 +27,7 @@ module.exports = yeoman.Base.extend({
     yeoman.Base.apply(this, arguments);
 
     this.argument('name', {
-      desc: g.f('Name of the model to create.'),
+      desc: g.t('Name of the model to create.'),
       required: false,
       type: String,
     });
@@ -60,7 +60,7 @@ module.exports = yeoman.Base.extend({
       var warning = chalk.red('Warning: Found no data sources to attach ' +
         'model. There will be no data-access methods available until ' +
         'datasources are attached.');
-      g.log(g.f(warning));
+      this.log(g.t(warning));
       return;
     }
   },
@@ -69,7 +69,7 @@ module.exports = yeoman.Base.extend({
     var prompts = [
       {
         name: 'name',
-        message: g.f('Enter the model name:'),
+        message: g.t('Enter the model name:'),
         default: this.name,
         validate: validateRequiredName,
       },
@@ -88,13 +88,13 @@ module.exports = yeoman.Base.extend({
     }
 
     var prompts = [{
-        name: 'dataSource',
-        message: g.f('Select the data-source to attach %s' +
+      name: 'dataSource',
+      message: g.f('Select the data-source to attach %s' +
         ' to:', this.displayName),
-        type: 'list',
-        default: this.defaultDataSource,
-        choices: this.dataSources
-      }];
+      type: 'list',
+      default: this.defaultDataSource,
+      choices: this.dataSources,
+    }];
 
     return this.prompt(prompts).then(function(props) {
       if (this.hasDatasources) {
@@ -125,21 +125,21 @@ module.exports = yeoman.Base.extend({
     var baseModelChoices = ['Model', 'PersistedModel']
       .concat(this.modelNames)
       .concat([{
-        name: g.f('(custom)'),
-        value: null
+        name: g.t('(custom)'),
+        value: null,
       }]);
 
     var prompts = [
       {
         name: 'base',
-        message: g.f('Select model\'s base class'),
+        message: g.t('Select model\'s base class'),
         type: 'list',
         default: this.baseModel,
         choices: baseModelChoices,
       },
       {
         name: 'customBase',
-        message: g.f('Enter the base model name:'),
+        message: g.t('Enter the base model name:'),
         required: true,
         validate: validateRequiredName,
         when: function(answers) {
@@ -149,24 +149,24 @@ module.exports = yeoman.Base.extend({
       {
         name: 'public',
         message: g.f('Expose %s via the REST API?', this.displayName),
-        type: 'confirm'
+        type: 'confirm',
       },
       {
         name: 'plural',
-        message: g.f('Custom plural form (used to build REST URL):'),
+        message: g.t('Custom plural form (used to build REST URL):'),
         when: function(answers) {
           return answers.public;
         },
       },
       {
         name: 'facetName',
-        message: g.f('Common model or server only?'),
+        message: g.t('Common model or server only?'),
         type: 'list',
         default: 'common',
         choices: [
-          {name: g.f('common'), value: 'common'},
-          {name: g.f('server'), value: 'server'}]
-      }
+          {name: g.t('common'), value: 'common'},
+          {name: g.t('server'), value: 'server'}],
+      },
     ];
 
     return  this.prompt(prompts).then(function(props) {
@@ -208,18 +208,18 @@ module.exports = yeoman.Base.extend({
   },
 
   delim: function() {
-    g.log('Let\'s add some %s properties now.\n', this.displayName);
+    this.log(g.f('Let\'s add some %s properties now.\n', this.displayName));
   },
 
   property: function() {
     var done = this.async();
-    g.log('Enter an empty property name when done.');
+    this.log(g.t('Enter an empty property name when done.'));
     var prompts = [
       {
         name: 'propertyName',
-        message: g.f('Property name:'),
-        validate: validateOptionalName
-      }
+        message: g.t('Property name:'),
+        validate: validateOptionalName,
+      },
     ];
     return this.prompt(prompts).then(function(answers) {
       if (answers.propertyName == null || answers.propertyName === '') {
@@ -241,7 +241,7 @@ module.exports = yeoman.Base.extend({
           if (err) {
             return done(err);
           }
-          g.log(g.f('\nLet\'s add another %s property.', this.displayName));
+          this.log(g.f('\nLet\'s add another %s property.', this.displayName));
           this.property();
         }.bind(this));
     }.bind(this));

@@ -63,7 +63,7 @@ module.exports = yeoman.Base.extend({
     var prompts = [
       {
         name: 'model',
-        message: g.f('Select the model to apply the ACL entry to:'),
+        message: g.t('Select the model to apply the ACL entry to:'),
         type: 'list',
         default: 0,
         choices: modelChoices,
@@ -84,7 +84,7 @@ module.exports = yeoman.Base.extend({
     var prompts = [
       {
         name: 'scope',
-        message: g.f('Select the ACL scope:'),
+        message: g.t('Select the ACL scope:'),
         type: 'list',
         default: 'all',
         choices: [
@@ -97,21 +97,21 @@ module.exports = yeoman.Base.extend({
       },
       {
         name: 'property',
-        message: g.f('Enter the method name'),
+        message: g.t('Enter the method name'),
         when: function(answers) {
           return answers.scope === 'method';
         },
       },
       {
         name: 'property',
-        message: g.f('Enter the property name'),
+        message: g.t('Enter the property name'),
         when: function(answers) {
           return answers.scope === 'property';
         },
       },
       {
         name: 'accessType',
-        message: g.f('Select the access type:'),
+        message: g.t('Select the access type:'),
         type: 'list',
         default: '*',
         when: function(answers) {
@@ -121,7 +121,7 @@ module.exports = yeoman.Base.extend({
       },
       {
         name: 'role',
-        message: g.f('Select the role'),
+        message: g.t('Select the role'),
         type: 'list',
         default: '$everyone',
         choices: this.roleValues.concat(['other']),
@@ -129,14 +129,14 @@ module.exports = yeoman.Base.extend({
       {
         name: 'customRole',
         message:
-          g.f('Enter the role name:'),
+          g.t('Enter the role name:'),
         when: function(answers) {
           return answers.role === 'other';
         },
       },
       {
         name: 'permission',
-        message: g.f('Select the permission to apply'),
+        message: g.t('Select the permission to apply'),
         type: 'list',
         choices: this.permissionValues,
       },

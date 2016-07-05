@@ -5,11 +5,11 @@
 
 'use strict';
 
-var path = require('path');
 var SG = require('strong-globalize');
 var g = SG();
 
 var helpers = require('../lib/helpers');
+var path = require('path');
 var yeoman = require('yeoman-generator');
 
 var validateRequiredName = helpers.validateRequiredName;
@@ -19,7 +19,7 @@ module.exports = yeoman.Base.extend({
     yeoman.Base.apply(this, arguments);
 
     this.argument('name', {
-      desc: g.f('Name of the boot script to create.'),
+      desc: g.t('Name of the boot script to create.'),
       required: false,
       optional: true,
       type: String,
@@ -37,7 +37,7 @@ module.exports = yeoman.Base.extend({
 
     var question = {
       name: 'name',
-      message: g.f('Enter the script name (without `.js`):'),
+      message: g.t('Enter the script name (without {{`.js`}}):'),
       default: this.name,
       validate: validateRequiredName,
     };
@@ -51,12 +51,12 @@ module.exports = yeoman.Base.extend({
   askForType: function() {
     var question = {
       name: 'type',
-      message: g.f('What type of boot script do you want to generate?'),
+      message: g.t('What type of boot script do you want to generate?'),
       type: 'list',
       choices: [
-        {name: g.f('async'), value: 'async'},
-        {name: g.f('sync'), value: 'sync'}],
-      default: 'async'
+        {name: g.t('async'), value: 'async'},
+        {name: g.t('sync'), value: 'sync'}],
+      default: 'async',
     };
 
     return this.prompt(question).then(function(answer) {
