@@ -133,17 +133,17 @@ describe('loopback:property generator', function() {
                       // https://github.com/yeoman/generator/issues/600
       customItemType: '', // temporary workaround for
                           // https://github.com/yeoman/generator/issues/600
-      itemType: 'string'
+      itemType: 'object'
     });
 
     propertyGenerator.run(function() {
       var definition = common.readJsonSync('common/models/car.json');
       var prop = definition.properties.list;
-      expect(prop.type).to.eql(['string']);
+      expect(prop.type).to.eql(['object']);
       done();
     });
   });
-  
+
   it('creates string item typed array', function(done) {
     var propertyGenerator = givenPropertyGenerator();
     helpers.mockPrompt(propertyGenerator, {
@@ -183,6 +183,50 @@ describe('loopback:property generator', function() {
       expect(props.parts).to.eql({
         type: ['number'],
         default: [123456, 98765]
+      });
+      done();
+    });
+  });
+
+  it('creates boolean item typed array', function(done) {
+    var propertyGenerator = givenPropertyGenerator();
+    helpers.mockPrompt(propertyGenerator, {
+      model: 'Car',
+      name: 'certifications',
+      type: 'array',
+      itemType: 'boolean',
+      defaultValue: 't,t'
+    });
+
+    propertyGenerator.run(function() {
+      var definition = common.readJsonSync('common/models/car.json');
+      var props = definition.properties || {};
+      expect(props).to.have.property('certifications');
+      expect(props.certifications).to.eql({
+        type: ['boolean'],
+        default: [true, true]
+      });
+      done();
+    });
+  });
+
+  it('creates date item typed array', function(done) {
+    var propertyGenerator = givenPropertyGenerator();
+    helpers.mockPrompt(propertyGenerator, {
+      model: 'Car',
+      name: 'serviceDates',
+      type: 'array',
+      itemType: 'date',
+      defaultValue: '1466087191000,1466097191000'
+    });
+
+    propertyGenerator.run(function() {
+      var definition = common.readJsonSync('common/models/car.json');
+      var props = definition.properties || {};
+      expect(props).to.have.property('serviceDates');
+      expect(props.serviceDates).to.eql({
+        type: ['date'],
+        default: ['2016-06-16T14:26:31.000Z', '2016-06-16T17:13:11.000Z']
       });
       done();
     });

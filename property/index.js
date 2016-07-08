@@ -62,7 +62,7 @@ module.exports = yeoman.Base.extend({
 
   askForParameters: function() {
     this.name = this.options.propertyName;
-
+    
     var prompts = [
       {
         name: 'name',
@@ -77,7 +77,9 @@ module.exports = yeoman.Base.extend({
         name: 'type',
         message: 'Property type:',
         type: 'list',
-        default: this.propDefinition && this.propDefinition.type,
+        default: this.propDefinition && 
+          (Array.isArray(this.propDefinition.type) ? 
+            'array' : this.propDefinition.type),
         choices: typeChoices
       },
       {
@@ -147,18 +149,25 @@ module.exports = yeoman.Base.extend({
         this.propDefinition.required = Boolean(answers.required);
       }
 
-      if (answers.defaultValue) {
-        try {
-          coerceDefaultValue(this.propDefinition, answers.defaultValue);
-          debug('property definition: %j', this.propDefinition);
-        } catch (err) {
-          debug('Failed to coerce property default value: ', err);
+      if (answers.defaultValue === '') {
           this.log('Warning: please enter the ' + this.name +
             ' property again. The default value provided "' +
             answers.defaultValue + 
-            '" is not valid for the selected type: ' + this.type);
+            '" is not valid for type: ' + this.type);
           return this.askForParameters();
-        }
+      }
+
+      try {
+        debug('property definition input: %j', this.propDefinition);
+        coerceDefaultValue(this.propDefinition, answers.defaultValue);
+        debug('property coercion output: %j', this.propDefinition);
+      } catch (err) {
+        debug('Failed to coerce property default value: ', err);
+        this.log('Warning: please enter the ' + this.name +
+          ' property again. The default value provided "' +
+          answers.defaultValue + 
+          '" is not valid for the selected type: ' + this.type);
+        return this.askForParameters();
       }
       done();
     }.bind(this));
@@ -193,22 +202,13 @@ function coerceDefaultValue(propDef, value) {
       propDef.default = castToNumber(value);
       break;
     case 'boolean':
-      if (['true', '1', 't'].indexOf(value) !== -1 ){
-        propDef.default = true;
-      } else {
-        propDef.default = false;
-      }
+      propDef.default = castToBoolean(value);
       break;
     case 'date':
       if (value.toLowerCase() === 'now'){
         propDef.defaultFn = 'now';
       } else {
-        var isNumber = /^[0-9]+$/.test(value);
-        if (isNumber) {
-          propDef.default = new Date(castToNumber(value));
-        } else {
-          propDef.default = new Date(value);
-        }
+        propDef.default = castToDate(value);
       }
       break;
     case 'array':
@@ -219,6 +219,16 @@ function coerceDefaultValue(propDef, value) {
         propDef.default = value.replace(/[\s,]+/g, ',').split(',')
           .map(function(item) {
             return castToNumber(item);
+          });
+      } else if (itemType === 'boolean') {
+        propDef.default = value.replace(/[\s,]+/g, ',').split(',')
+          .map(function(item) {
+            return castToBoolean(item);
+          });
+      } else if (itemType === 'date') {
+        propDef.default = value.replace(/[\s,]+/g, ',').split(',')
+          .map(function(item) {
+            return castToDate(item);
           });
       } else {
         propDef.default = value;
@@ -242,10 +252,29 @@ function coerceDefaultValue(propDef, value) {
   }
 }
 
+function castToDate(value) {
+  var dateValue;
+  var isNumber = /^[0-9]+$/.test(value);
+  if (isNumber) {
+    dateValue = new Date(castToNumber(value));
+  } else {
+    dateValue = new Date(value);
+  }
+  return dateValue;
+}
+
 function castToNumber(value) {
   var numberValue = Number(value);
   if (isNaN(numberValue)) {
     throw Error('Invalid default number value: '+ value);
   }
   return numberValue;
+}
+
+function castToBoolean(value) {
+  if (['true', '1', 't', 'false', '0', 'f'].indexOf(value) === -1) {
+    throw Error('Invalid default boolean value "'+ value +
+      '". Expected default values: true|false, 1|0, t|f');
+  }
+  return (['true', '1', 't'].indexOf(value) !== -1) ? true : false;
 }
