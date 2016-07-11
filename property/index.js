@@ -55,7 +55,7 @@ module.exports = yeoman.Base.extend({
 
     if (!this.modelDefinition) {
       var msg = 'Model not found: ' + this.modelName;
-      this.log(chalk.red(msg));
+      console.warn(chalk.red(msg));
       this.async()(new Error(msg));
     }
   },
@@ -113,10 +113,18 @@ module.exports = yeoman.Base.extend({
       {
          name: 'defaultValue',
          message: 'Default value[leave blank for none]:',
-         default: null
+         default: null,
+         when: function(answers) {
+          return answers.required &&
+            answers.type !== null && 
+            answers.type !== 'any'&&
+            typeChoices.indexOf(answers.type) !== -1;
+        }
       }
     ];
-    return this.prompt(prompts).then(function(answers) {
+
+    this.prompt(prompts, function(answers) {
+      debug('answers: %j', answers);
       this.name = answers.name || this.name;
       if (answers.type === 'array') {
         var itemType =  answers.customItemType || answers.itemType;
@@ -124,96 +132,109 @@ module.exports = yeoman.Base.extend({
       } else {
         this.type = answers.customType || answers.type;
       }
-      this.required = answers.required;
-      this.defaultValue = answers.defaultValue;
+
+      this.propDefinition = {
+        name: this.name,
+        type: this.type
+      };
+      if (answers.required) {
+        this.propDefinition.required = true;
+      }
+
+      if (answers.defaultValue) {
+        this.propDefinition.type = answers.type;
+        this.propDefinition.itemType = answers.itemType;
+        try {
+          coerceDefaultValue(this.propDefinition, answers.defaultValue);
+          debug('property definition: %j', this.propDefinition);
+        } catch (err) {
+          debug('Failed to coerce property default value: ', err);
+          this.log('Warning: please enter the ' + this.name +
+            ' property again. The default value provided "' +
+            answers.defaultValue + 
+            '" is not valid for the selected type: ' + this.type);
+          this.askForParameters();
+        }
+      }
+      done();
     }.bind(this));
   },
 
   property: function() {
     var done = this.async();
-    var def = {
-      name: this.name,
-      type: this.type
-    };
-    if (this.required) {
-      def.required = true;
-    }
-
-    if (this.defaultValue) {
-      def = coerceDefault(def, this.defaultValue);
-    }
-    debug(this.modelName+ ' property: %j', def);
-
-    this.modelDefinition.properties.create(def, function(err) {
-      helpers.reportValidationError(err, this.log);
+    this.modelDefinition.properties.create(this.propDefinition, function(err) {
+      helpers.reportValidationError(err, console.warn);
       return done(err);
     }.bind(this));
   },
-
   saveProject: actions.saveProject
 });
 
-function coerceDefault(def, value) {
-  var isSupported = typeChoices.indexOf(def.type) !== -1;
-  debug('property type "%s" >> supported: %s', def.type, isSupported);
-
-  if (typeof value === 'string' && isSupported) {
-    switch ((def.type || '').toLowerCase()) {
-      case 'string':
-        if (value === 'uuid' || value === 'guid'){
-          def.defaultFn = value;
+function coerceDefaultValue(propDef, value) {
+  switch (propDef.type) {
+    case 'string':
+      if (value === 'uuid' || value === 'guid'){
+        propDef.defaultFn = value;
+      } else {
+        propDef.default = value;
+      }
+      break;
+    case 'number':
+      propDef.default = Number(value);
+      if(isNaN(propDef.default)) {
+        throw Error('Invalid default number value: '+ value);
+      }
+      break;
+    case 'boolean':
+      if (['true', '1', 't'].indexOf(value) !== -1 ){
+        propDef.default = true;
+      } else {
+        propDef.default = false;
+      }
+      break;
+    case 'date':
+      if (value.toLowerCase() === 'now'){
+        propDef.defaultFn = 'now';
+      } else {
+        var isNumber = /^[0-9]+$/.test(value);
+        if (isNumber) {
+          propDef.default = new Date(Number(value));
         } else {
-          def.default = value;
+          propDef.default = new Date(value);
         }
-        break;
-      case 'number':
-        def.default = Number(value);
-        break;
-      case 'boolean':
-        if (['true', '1', 't'].indexOf(value) !== -1 ){
-          def.default = true;
-        } else {
-          def.default = false;
-        }
-        break;
-      case 'object':
-        def.default = JSON.parse(value);
-        break;
-      case 'array':
-        def.default = value.replace(/[\s,]+/g, ',').split(',');
-        break;
-      case 'date':
-        console.warn('Warning: property default value was converted' +
-          ' from string using ISO formatting');
-        if (value.toLowerCase() === 'now'){
-          def.defaultFn = 'now';
-        } else {
-          def.default = new Date(value);
-        }
-        break;
-      case 'geopoint':
-        if (value.indexOf('lat') !== -1 && value.indexOf('lng') !== -1) {
-          def.default = JSON.parse(value);
-        } else {
-          var geo = value.replace(/[\s,]+/g, ',').split(',');
-          def.default = {};
-          def.default.lat = Number(geo[0]);
-          def.default.lng = Number(geo[1]);
-        }
-        break;
-      case 'buffer':
-        console.warn('Warning: property default value was converted' + 
-          'from string using UTF8 encoding');
-        def.default = new Buffer(value);
-        break;
-      case 'any':
-        console.warn('Warning: property default value was stored as string');
-        def.default = value;
-        break;
-      default:
-    }
-    return def;
-  } else {
-    throw Error('Unsupported model property type: ' + def.type);
+      }
+      break;
+    case 'array':
+      if (propDef.itemType === 'string') {
+        propDef.default = value.replace(/[\s,]+/g, ',').split(',');
+      } else if (propDef.itemType === 'number') {
+        propDef.default = value.replace(/[\s,]+/g, ',').split(',')
+          .map(function(item) {
+            return Number(item);
+          });
+      } else {
+        propDef.default = value;
+      }
+      break;
+    case 'geopoint':
+      if (value.indexOf('lat') !== -1 && value.indexOf('lng') !== -1) {
+        propDef.default = JSON.parse(value);
+      } else {
+        var geo = value.replace(/[\s,]+/g, ',').split(',');
+        propDef.default = {};
+        propDef.default.lat = Number(geo[0]);
+        propDef.default.lng = Number(geo[1]);
+      }
+      break;
+    case 'buffer':
+      console.warn('Warning: property default value was converted' + 
+        'from string using default node.js UTF8 encoding');
+      propDef.default = new Buffer(value);
+      break;
+    case 'object':
+      propDef.default = JSON.parse(value);
+      break;
+    default:
+      propDef.default = value;
   }
 }

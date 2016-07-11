@@ -35,7 +35,30 @@ describe('loopback:property generator', function() {
       });
   });
 
-  it('should create model containing boolean type', function(done) {
+  it('creates number type property from large number', function(done) {
+    var propertyGenerator = givenPropertyGenerator();
+    helpers.mockPrompt(propertyGenerator, {
+      model: 'Car',
+      name: 'age',
+      type: 'number',
+      required: 'true',
+      defaultValue: '55555555555555555555.5'
+    });
+
+    propertyGenerator.run(function() {
+      var definition = common.readJsonSync('common/models/car.json');
+      var props = definition.properties || {};
+      expect(props).to.have.property('age');
+      expect(props.age).to.eql({
+        type: 'number',
+        required: true,
+        default: 55555555555555555555.5
+      });
+      done();
+    });
+  });
+
+  it('creates model containing boolean type', function(done) {
     var propertyGenerator = givenPropertyGenerator();
     helpers.mockPrompt(propertyGenerator, {
       model: 'Car',
@@ -58,53 +81,7 @@ describe('loopback:property generator', function() {
     });
   });
 
-  it('should create model containing number type', function(done) {
-    var propertyGenerator = givenPropertyGenerator();
-    helpers.mockPrompt(propertyGenerator, {
-      model: 'Car',
-      name: 'age',
-      type: 'number',
-      required: 'true',
-      defaultValue: '555555555555555555555.5'
-    });
-
-    propertyGenerator.run(function() {
-      var definition = common.readJsonSync('common/models/car.json');
-      var props = definition.properties || {};
-      expect(props).to.have.property('age');
-      expect(props.age).to.eql({
-        type: 'number',
-        required: true,
-        default: 555555555555555555555.5
-      });
-      done();
-    });
-  });
-
-  it('should create model containing array type', function(done) {
-    var propertyGenerator = givenPropertyGenerator();
-    helpers.mockPrompt(propertyGenerator, {
-      model: 'Car',
-      name: 'options',
-      type: 'array',
-      required: 'true',
-      defaultValue: 'AWD,3.2L, navigation'
-    });
-
-    propertyGenerator.run(function() {
-      var definition = common.readJsonSync('common/models/car.json');
-      var props = definition.properties || {};
-      expect(props).to.have.property('options');
-      expect(props.options).to.eql({
-        type: 'array',
-        required: true,
-        default: ['AWD','3.2L','navigation']
-      });
-      done();
-    });
-  });
-
-  it('should create model containing date type', function(done) {
+  it('creates date type property from ISO string', function(done) {
     var propertyGenerator = givenPropertyGenerator();
     helpers.mockPrompt(propertyGenerator, {
       model: 'Car',
@@ -127,7 +104,97 @@ describe('loopback:property generator', function() {
     });
   });
 
-  it('should create model containing geopoint type', function(done) {
+  it('creates date type property from number', function(done) {
+    var propertyGenerator = givenPropertyGenerator();
+    helpers.mockPrompt(propertyGenerator, {
+      model: 'Car',
+      name: 'year',
+      type: 'date',
+      required: 'true',
+      defaultValue: '1466087191000'
+    });
+
+    propertyGenerator.run(function() {
+      var definition = common.readJsonSync('common/models/car.json');
+      var props = definition.properties || {};
+      expect(props).to.have.property('year');
+      expect(props.year).to.eql({
+        type: 'date',
+        required: true,
+        default: '2016-06-16T14:26:31.000Z'
+      });
+      done();
+    });
+  });
+
+  it('creates a typed array', function(done) {
+    var propertyGenerator = givenPropertyGenerator();
+    helpers.mockPrompt(propertyGenerator, {
+      model: 'Car',
+      name: 'list',
+      type: 'array',
+      itemType: 'string'
+    });
+
+    propertyGenerator.run(function() {
+      var definition = common.readJsonSync('common/models/car.json');
+      var prop = definition.properties.list;
+      expect(prop.type).to.eql(['string']);
+      done();
+    });
+  });
+  
+  it('creates string item typed array', function(done) {
+    var propertyGenerator = givenPropertyGenerator();
+    helpers.mockPrompt(propertyGenerator, {
+      model: 'Car',
+      name: 'options',
+      type: 'array',
+      itemType: 'string',
+      required: 'true',
+      defaultValue: 'AWD,3.2L, navigation'
+    });
+
+    propertyGenerator.run(function() {
+      var definition = common.readJsonSync('common/models/car.json');
+      var props = definition.properties || {};
+      expect(props).to.have.property('options');
+      expect(props.options).to.eql({
+        type: 'array',
+        itemType: 'string',
+        required: true,
+        default: ['AWD','3.2L','navigation']
+      });
+      done();
+    });
+  });
+
+  it('creates number item typed array', function(done) {
+    var propertyGenerator = givenPropertyGenerator();
+    helpers.mockPrompt(propertyGenerator, {
+      model: 'Car',
+      name: 'parts',
+      type: 'array',
+      itemType: 'number',
+      required: 'true',
+      defaultValue: '123456, 98765'
+    });
+
+    propertyGenerator.run(function() {
+      var definition = common.readJsonSync('common/models/car.json');
+      var props = definition.properties || {};
+      expect(props).to.have.property('parts');
+      expect(props.parts).to.eql({
+        type: 'array',
+        itemType: 'number',
+        required: true,
+        default: [123456, 98765]
+      });
+      done();
+    });
+  });
+
+  it('creates geopoint type property from object', function(done) {
     var propertyGenerator = givenPropertyGenerator();
     helpers.mockPrompt(propertyGenerator, {
       model: 'Car',
@@ -150,7 +217,7 @@ describe('loopback:property generator', function() {
     });
   });
 
-  it('should create model containing geopoint type', function(done) {
+  it('creates geopoint type property from numbers', function(done) {
     var propertyGenerator = givenPropertyGenerator();
     helpers.mockPrompt(propertyGenerator, {
       model: 'Car',
@@ -196,6 +263,7 @@ describe('loopback:property generator', function() {
       model: 'Car',
       name: 'created',
       type: 'date',
+      required: true,
       defaultValue: 'Now'
     });
 
@@ -207,12 +275,13 @@ describe('loopback:property generator', function() {
     });
   });
 
-  it('should create defaultFn: "guid" on date fields', function(done) {
+  it('creates defaultFn: "guid" on date fields', function(done) {
     var propertyGenerator = givenPropertyGenerator();
     helpers.mockPrompt(propertyGenerator, {
       model: 'Car',
       name: 'uniqueId',
       type: 'string',
+      required: true,
       defaultValue: 'uuid'
     });
 
@@ -224,7 +293,7 @@ describe('loopback:property generator', function() {
     });
   });
 
-  it('should fail to create with unsupported type', function (done) {
+  it('fails to create with unsupported type', function (done) {
     var propertyGenerator = givenPropertyGenerator();
     helpers.mockPrompt(propertyGenerator, {
       model: 'Car',
