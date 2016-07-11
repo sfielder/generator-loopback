@@ -139,8 +139,10 @@ module.exports = yeoman.Base.extend({
       this.propDefinition = {
         name: this.name,
         type: this.type,
-        required: Boolean(answers.required),
       };
+      if (answers.required) {
+        this.propDefinition = Boolean(answers.required);
+      }
 
       if (answers.defaultValue) {
         try {

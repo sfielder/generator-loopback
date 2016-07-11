@@ -41,7 +41,6 @@ describe('loopback:property generator', function() {
       model: 'Car',
       name: 'age',
       type: 'number',
-      required: 'true',
       defaultValue: '55555555555555555555.5'
     });
 
@@ -51,7 +50,6 @@ describe('loopback:property generator', function() {
       expect(props).to.have.property('age');
       expect(props.age).to.eql({
         type: 'number',
-        required: true,
         default: 55555555555555555555.5
       });
       done();
@@ -68,7 +66,6 @@ describe('loopback:property generator', function() {
       customItemType: '', // temporary workaround for
                           // https://github.com/yeoman/generator/issues/600
       type: 'boolean',
-      required: 'true',
       defaultValue: 'true'
     });
 
@@ -78,7 +75,6 @@ describe('loopback:property generator', function() {
       expect(props).to.have.property('isPreferred');
       expect(props.isPreferred).to.eql({
         type: 'boolean',
-        required: true,
         default: true
       });
       done();
@@ -91,7 +87,6 @@ describe('loopback:property generator', function() {
       model: 'Car',
       name: 'year',
       type: 'date',
-      required: 'true',
       defaultValue: '2015-11'
     });
 
@@ -101,7 +96,6 @@ describe('loopback:property generator', function() {
       expect(props).to.have.property('year');
       expect(props.year).to.eql({
         type: 'date',
-        required: true,
         default: '2015-11-01T00:00:00.000Z'
       });
       done();
@@ -114,7 +108,6 @@ describe('loopback:property generator', function() {
       model: 'Car',
       name: 'year',
       type: 'date',
-      required: 'true',
       defaultValue: '1466087191000'
     });
 
@@ -124,7 +117,6 @@ describe('loopback:property generator', function() {
       expect(props).to.have.property('year');
       expect(props.year).to.eql({
         type: 'date',
-        required: true,
         default: '2016-06-16T14:26:31.000Z'
       });
       done();
@@ -159,7 +151,6 @@ describe('loopback:property generator', function() {
       name: 'options',
       type: 'array',
       itemType: 'string',
-      required: 'true',
       defaultValue: 'AWD,3.2L, navigation'
     });
 
@@ -169,7 +160,6 @@ describe('loopback:property generator', function() {
       expect(props).to.have.property('options');
       expect(props.options).to.eql({
         type: ['string'],
-        required: true,
         default: ['AWD','3.2L','navigation']
       });
       done();
@@ -183,7 +173,6 @@ describe('loopback:property generator', function() {
       name: 'parts',
       type: 'array',
       itemType: 'number',
-      required: 'true',
       defaultValue: '123456, 98765'
     });
 
@@ -193,7 +182,6 @@ describe('loopback:property generator', function() {
       expect(props).to.have.property('parts');
       expect(props.parts).to.eql({
         type: ['number'],
-        required: true,
         default: [123456, 98765]
       });
       done();
@@ -206,7 +194,6 @@ describe('loopback:property generator', function() {
       model: 'Car',
       name: 'location',
       type: 'geopoint',
-      required: 'true',
       defaultValue: '{"lat": 55.5, "lng":44.4}'
     });
 
@@ -216,7 +203,6 @@ describe('loopback:property generator', function() {
       expect(props).to.have.property('location');
       expect(props.location).to.eql({
         type: 'geopoint',
-        required: true,
         default: {'lat': 55.5, 'lng':44.4}
       });
       done();
@@ -229,7 +215,6 @@ describe('loopback:property generator', function() {
       model: 'Car',
       name: 'location',
       type: 'geopoint',
-      required: 'true',
       defaultValue: '55.5, 44.4'
     });
 
@@ -239,7 +224,6 @@ describe('loopback:property generator', function() {
       expect(props).to.have.property('location');
       expect(props.location).to.eql({
         type: 'geopoint',
-        required: true,
         default: {'lat': 55.5, 'lng':44.4}
       });
       done();
@@ -263,7 +247,7 @@ describe('loopback:property generator', function() {
     });
   });
 
-  it('creates a defaultFn: "now" on date fields if specified', function(done) {
+  it('creates a defaultFn: "now" on date fields', function(done) {  
     var propertyGenerator = givenPropertyGenerator();
     helpers.mockPrompt(propertyGenerator, {
       model: 'Car',
@@ -294,7 +278,6 @@ describe('loopback:property generator', function() {
                       // https://github.com/yeoman/generator/issues/600
       customItemType: '', // temporary workaround for
                           // https://github.com/yeoman/generator/issues/600
-      required: true,
       defaultValue: 'uuid'
     });
 
