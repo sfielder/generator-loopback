@@ -140,12 +140,7 @@ module.exports = yeoman.Base.extend({
     }
 
     if (this.defaultValue) {
-      try {
-        def = coerceDefault(def, this.defaultValue);
-      } catch(err) {
-        throw Error('Failed converting "' + this.defaultValue +
-          '" - ' +  err);
-      }
+      def = coerceDefault(def, this.defaultValue);
     }
     debug(this.modelName+ ' property: %j', def);
 
@@ -162,10 +157,14 @@ function coerceDefault(def, value) {
   var isSupported = typeChoices.indexOf(def.type) !== -1;
   debug('property type "%s" >> supported: %s', def.type, isSupported);
 
-  if (isSupported) {
+  if (typeof value === 'string' && isSupported) {
     switch ((def.type || '').toLowerCase()) {
       case 'string':
-        def.default = value;
+        if (value === 'uuid' || value === 'guid'){
+          def.defaultFn = value;
+        } else {
+          def.default = value;
+        }
         break;
       case 'number':
         def.default = Number(value);
@@ -183,7 +182,9 @@ function coerceDefault(def, value) {
       case 'array':
         def.default = value.replace(/[\s,]+/g, ',').split(',');
         break;
-      case 'date', 'datetime':
+      case 'date':
+        console.warn('Warning: property default value was converted' +
+          ' from string using ISO formatting');
         if (value.toLowerCase() === 'now'){
           def.defaultFn = 'now';
         } else {
@@ -201,18 +202,18 @@ function coerceDefault(def, value) {
         }
         break;
       case 'buffer':
+        console.warn('Warning: property default value was converted' + 
+          'from string using UTF8 encoding');
+        def.default = new Buffer(value);
         break;
       case 'any':
+        console.warn('Warning: property default value was stored as string');
+        def.default = value;
         break;
       default:
-        if (value === 'uuid' || value === 'guid'){
-          def.defaultFn = value;
-        } else {
-          def.default = value;
-        }
     }
     return def;
   } else {
-    throw Error('Unsupported model property type ' + def.type);
+    throw Error('Unsupported model property type: ' + def.type);
   }
 }

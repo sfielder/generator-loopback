@@ -12,7 +12,7 @@ var SANDBOX =  path.resolve(__dirname, 'sandbox');
 var expect = require('chai').expect;
 var common = require('./common');
 
-describe.only('loopback:property generator', function() {
+describe('loopback:property generator', function() {
   beforeEach(common.resetWorkspace);
   beforeEach(function createSandbox(done) {
     helpers.testDirectory(SANDBOX, done);
@@ -35,7 +35,7 @@ describe.only('loopback:property generator', function() {
       });
   });
 
-  it('adds an entry to common/models/{name}.json', function(done) {
+  it('should create model containing boolean type', function(done) {
     var propertyGenerator = givenPropertyGenerator();
     helpers.mockPrompt(propertyGenerator, {
       model: 'Car',
@@ -121,7 +121,7 @@ describe.only('loopback:property generator', function() {
       expect(props.year).to.eql({
         type: 'date',
         required: true,
-        default: '2015-11'
+        default: '2015-11-01T00:00:00.000Z'
       });
       done();
     });
@@ -207,7 +207,7 @@ describe.only('loopback:property generator', function() {
     });
   });
 
-  it('creates a defaultFn: "guid" on date fields if specified', function(done) {
+  it('should create defaultFn: "guid" on date fields', function(done) {
     var propertyGenerator = givenPropertyGenerator();
     helpers.mockPrompt(propertyGenerator, {
       model: 'Car',
@@ -222,6 +222,20 @@ describe.only('loopback:property generator', function() {
       expect(prop.defaultFn).to.eql('uuid');
       done();
     });
+  });
+
+  it('should fail to create with unsupported type', function (done) {
+    var propertyGenerator = givenPropertyGenerator();
+    helpers.mockPrompt(propertyGenerator, {
+      model: 'Car',
+      name: 'something',
+      type: 'unknown',
+      required: 'true',
+      defaultValue: 'X'
+    });
+
+    expect(propertyGenerator.run).to.throw(Error);
+    done();
   });
 
   function givenPropertyGenerator() {
